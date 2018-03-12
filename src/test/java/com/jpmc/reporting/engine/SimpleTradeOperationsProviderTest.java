@@ -1,5 +1,7 @@
 package com.jpmc.reporting.engine;
 
+import com.jpmc.reporting.input.InputDataProvider;
+import com.jpmc.reporting.input.SimpleInputDataProvider;
 import com.jpmc.reporting.model.Instruction;
 import com.jpmc.reporting.model.Operation;
 import org.junit.Before;
@@ -11,9 +13,7 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 public class SimpleTradeOperationsProviderTest {
 
     private TradeOperationsProvider tradeOpsProvider;
+    private InputDataProvider dataProvider;
     private LocalDate aMondayDate;
     private LocalDate aSaturdayDate;
     private Currency aed;
@@ -36,77 +37,13 @@ public class SimpleTradeOperationsProviderTest {
     public void setup() {
 
         tradeOpsProvider = new SimpleTradeOperationsProvider();
+        dataProvider = new SimpleInputDataProvider();
         aMondayDate = LocalDate.of(2016, Month.FEBRUARY, 8);
         aSaturdayDate = LocalDate.of(2016, Month.MARCH, 12);
         aed = Currency.getInstance("AED");
         sar = Currency.getInstance("SAR");
         euro = Currency.getInstance("EUR");
-        instructions = new ArrayList<>();
-
-        Instruction firstInstruction =
-                new Instruction.Builder()
-                        .entity("foo")
-                        .tradeOperation(Operation.BUY)
-                        .agreedFx(new BigDecimal(0.50))
-                        .currency(Currency.getInstance("EUR"))
-                        .instructionDate(LocalDate.of(2016, Month.JANUARY, 1))
-                        .settlementDate(LocalDate.of(2016, Month.JANUARY, 2))
-                        .units(200)
-                        .unitPrice(new BigDecimal(100.25))
-                        .build();
-
-        Instruction secondInstruction =
-                new Instruction.Builder()
-                        .entity("bar")
-                        .tradeOperation(Operation.SELL)
-                        .agreedFx(new BigDecimal(0.22))
-                        .currency(Currency.getInstance("AED"))
-                        .instructionDate(LocalDate.of(2016, Month.JANUARY, 5))
-                        .settlementDate(LocalDate.of(2016, Month.FEBRUARY, 5))
-                        .units(450)
-                        .unitPrice(new BigDecimal(150.5))
-                        .build();
-
-//        Instruction thirdInstruction =
-//                new Instruction.Builder()
-//                        .entity("bar")
-//                        .tradeOperation(Operation.SELL)
-//                        .agreedFx(new BigDecimal(0.22))
-//                        .currency(Currency.getInstance("AED"))
-//                        .instructionDate(LocalDate.of(2016, Month.MAY, 5))
-//                        .settlementDate(LocalDate.of(2016, Month.MAY, 17))
-//                        .units(380)
-//                        .unitPrice(new BigDecimal(150.5))
-//                        .build();
-//
-//        Instruction forthInstruction =
-//                new Instruction.Builder()
-//                        .entity("qux")
-//                        .tradeOperation(Operation.SELL)
-//                        .agreedFx(new BigDecimal(0.27))
-//                        .currency(Currency.getInstance("SAR"))
-//                        .instructionDate(LocalDate.of(2016, Month.JUNE, 5))
-//                        .settlementDate(LocalDate.of(2016, Month.JUNE, 17))
-//                        .units(451)
-//                        .unitPrice(new BigDecimal(250.5))
-//                        .build();
-//
-//        Instruction fifthInstruction =
-//
-//                new Instruction.Builder()
-//                        .entity("quux")
-//                        .tradeOperation(Operation.BUY)
-//                        .agreedFx(new BigDecimal(3.26))
-//                        .currency(Currency.getInstance("AED"))
-//                        .instructionDate(LocalDate.of(2016, Month.JUNE, 18))
-//                        .settlementDate(LocalDate.of(2016, Month.JUNE, 19))
-//                        .units(551)
-//                        .unitPrice(new BigDecimal(160.5))
-//                        .build();
-
-        instructions.add(firstInstruction);
-        instructions.add(secondInstruction);
-
+        instructions = dataProvider.retrieveInstructions();
     }
 
     @Test
@@ -164,7 +101,14 @@ public class SimpleTradeOperationsProviderTest {
     }
 
     @Test
-    public void calculateInstructionTradeAmount_WithValidInstruction_ReturnsCorrectAmountPerFormula() {
+    public void calculateSettlementDate_WithInvalidArguments_ThrowsIllegalArgException() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("A valid date and currency symbol are required for settlement date calculation");
+        tradeOpsProvider.calculateSettlementDate(null,sar);
+    }
+
+    @Test
+    public void calculateInstructionTradeAmount_WithFirstInstruction_ReturnsCorrectAmountPerFormula() {
         BigDecimal expectedTradeAmount = new BigDecimal("10025").setScale(2, BigDecimal.ROUND_HALF_EVEN);
         BigDecimal actualTradeAmount = tradeOpsProvider.calculateInstructionTradeAmount(instructions.get(0));
         assertEquals(actualTradeAmount, expectedTradeAmount);
@@ -172,9 +116,72 @@ public class SimpleTradeOperationsProviderTest {
     }
 
     @Test
-    public void calculateInstructionTradeAmount_WithInvalidInstruction_ThrowsIllegalArgumentException() {
+    public void calculateInstructionTradeAmount_WithSecondInstruction_ReturnsCorrectAmountPerFormula() {
+        BigDecimal expectedTradeAmount = new BigDecimal("14899.50").setScale(2, BigDecimal.ROUND_HALF_EVEN);
+        BigDecimal actualTradeAmount = tradeOpsProvider.calculateInstructionTradeAmount(instructions.get(1));
+        assertEquals(actualTradeAmount, expectedTradeAmount);
+
+    }
+
+    @Test
+    public void calculateInstructionTradeAmount_WithInvalidInstruction_ThrowsIllegalArgException() {
         thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Instruction must not be null for trade amount calculation");
         tradeOpsProvider.calculateInstructionTradeAmount(null);
     }
 
+    @Test
+    public void calculateDailySettledAmount_WithInstructionsAndBuyFlag_ReturnsSettledAmountSortedByDate() {
+        Map<LocalDate,BigDecimal> expectedBuySettledAmount = new LinkedHashMap<>();
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.JANUARY,4),new BigDecimal("10025.00"));
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.JUNE,9),new BigDecimal("22782.38"));
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.JULY,7),new BigDecimal("66881.23"));
+
+        Map<LocalDate,BigDecimal> settledAmountForBuyOp = tradeOpsProvider.calculateDailySettledAmount(instructions,Operation.BUY);
+        assertThat(settledAmountForBuyOp.entrySet(), equalTo(expectedBuySettledAmount.entrySet()));
+    }
+
+    @Test
+    public void calculateDailySettledAmount_WithInstructionsAndSellFlag_ReturnsSettledAmountSortedByDate() {
+        Map<LocalDate,BigDecimal> expectedBuySettledAmount = new LinkedHashMap<>();
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.APRIL,9),new BigDecimal("14899.50"));
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.SEPTEMBER,9),new BigDecimal("10408.20"));
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.OCTOBER,17),new BigDecimal("19822.32"));
+
+        Map<LocalDate,BigDecimal> settledAmountForBuyOp = tradeOpsProvider.calculateDailySettledAmount(instructions,Operation.SELL);
+        assertThat(settledAmountForBuyOp.entrySet(), equalTo(expectedBuySettledAmount.entrySet()));
+    }
+
+    @Test
+    public void calculateDailySettledAmount_WithEmptyInstructionList_ThrowsIllegalArgException() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Instructions and operations must not be null/empty for amount settled calculation");
+        tradeOpsProvider.calculateDailySettledAmount(new ArrayList<>(), Operation.BUY);
+    }
+
+    @Test
+    public void calculateDailySettledAmount_WithNullInstructionList_ThrowsIllegalArgException() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Instructions and operations must not be null/empty for amount settled calculation");
+        tradeOpsProvider.calculateDailySettledAmount(null, Operation.BUY);
+    }
+
+    @Test
+    public void calculateDailySettledAmount_WithNullOperation_ThrowsIllegalArgException() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Instructions and operations must not be null/empty for amount settled calculation");
+        tradeOpsProvider.calculateDailySettledAmount(instructions, null);
+    }
+
+    @Test
+    public void rankEntitiesByInstructionAmount_WithInstructionsAndBuyFlag_ReturnsSettledAmountSortedByDate() {
+        Map<LocalDate,BigDecimal> expectedBuySettledAmount = new LinkedHashMap<>();
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.APRIL,9),new BigDecimal("14899.50"));
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.SEPTEMBER,9),new BigDecimal("10408.20"));
+        expectedBuySettledAmount.put(LocalDate.of(2016,Month.OCTOBER,17),new BigDecimal("19822.32"));
+
+        Map<String,BigDecimal> entitiesRanking = tradeOpsProvider.rankEntitiesByInstructionAmount(instructions,Operation.BUY);
+        System.out.print(entitiesRanking);
+
+    }
 }

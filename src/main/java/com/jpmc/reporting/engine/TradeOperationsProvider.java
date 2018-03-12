@@ -17,4 +17,6 @@ public interface TradeOperationsProvider {
 
     BigDecimal calculateInstructionTradeAmount(Instruction instruction);
 
+    Map<String,BigDecimal> rankEntitiesByInstructionAmount(List<Instruction> instructions, Operation op);
+
 }
