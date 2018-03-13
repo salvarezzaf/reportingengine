@@ -67,7 +67,16 @@ public class Instruction {
         }
 
         public Instruction build() {
+
+            if (!isValidInstance())
+                throw new IllegalArgumentException("Some mandatory fields on instruction were not set to correct values");
+
             return new Instruction(this);
+        }
+
+        boolean isValidInstance() {
+            return (entity != null && !entity.isEmpty() && tradeOperation != null && agreedFx != null && agreedFx.signum()!=-1
+                    && currency != null && instructionDate!=null && units > 0 && unitPrice!=null && unitPrice.signum() != -1);
         }
     }
 
@@ -116,10 +125,6 @@ public class Instruction {
         return unitPrice;
     }
 
-    public void setSettlementDate(LocalDate settlementDate) {
-        this.settlementDate = settlementDate;
-    }
-
     @Override
     public String toString() {
 
@@ -127,6 +132,6 @@ public class Instruction {
                 ", AgreedFx: " + this.agreedFx + ", Currency: " + this.currency +
                 ", InstructionDate: " + this.instructionDate + ", SettlementDate: " + this.settlementDate +
                 ", Units: " + this.units + ", unitPrice: " + this.unitPrice;
-     }
+    }
 
 }

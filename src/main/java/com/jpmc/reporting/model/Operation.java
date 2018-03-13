@@ -2,7 +2,7 @@ package com.jpmc.reporting.model;
 
 public enum Operation {
 
-    BUY("B"), SELL("S");
+    BUY("outgoing"), SELL("incoming");
 
     private String operation;
 

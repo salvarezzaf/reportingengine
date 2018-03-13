@@ -63,28 +63,15 @@ public class SimpleTradeOperationsProvider implements TradeOperationsProvider {
     public Map<String, BigDecimal> rankEntitiesByInstructionAmount(List<Instruction> instructions, Operation op) {
 
         if (instructions == null || instructions.isEmpty() || op == null)
-            throw new IllegalArgumentException("Instructions and operations must not be null/empty for amount settled calculation");
+            throw new IllegalArgumentException("Instructions and operations must not be null/empty for entity ranking");
 
         return instructions.stream()
                 .filter(instruction -> instruction.getTradeOperation().equals(op))
                 .collect(groupingBy(Instruction::getEntity,
                         mapping(this::calculateInstructionTradeAmount, reducing(BigDecimal.ZERO, BigDecimal::add))))
                 .entrySet().stream()
-                .sorted(Map.Entry.<String,BigDecimal>comparingByValue().reversed())
+                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new));
-    }
-
-    private Map<?,BigDecimal> calculateAndSort(List<Instruction> instructions, Operation op, String keyName,Comparator<Map.Entry<?,BigDecimal>> comp) {
-
-       return instructions.stream()
-                .filter(instruction -> instruction.getTradeOperation().equals(op))
-                .collect(groupingBy(filteredInstr -> "entity".equals(keyName) ? filteredInstr.getEntity() :
-                                this.calculateSettlementDate(filteredInstr.getInstructionDate(), filteredInstr.getCurrency()),
-                        mapping(this::calculateInstructionTradeAmount, reducing(BigDecimal.ZERO, BigDecimal::add))))
-                .entrySet().stream()
-                .sorted(comp)
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v1, LinkedHashMap::new));
-
     }
 
     private boolean isWorkingDay(LocalDate instructionDate, Currency currency) {
