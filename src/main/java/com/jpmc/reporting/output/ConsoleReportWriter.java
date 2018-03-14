@@ -6,43 +6,73 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Currency;
+import java.util.Locale;
 import java.util.Map;
 
 public class ConsoleReportWriter implements ReportWriter {
 
+    private PrintWriter writer;
+    private Locale locale;
+
+    public ConsoleReportWriter(PrintWriter writer, Locale locale) {
+
+        this.writer = writer;
+        this.locale = locale;
+
+    }
+
     @Override
     public void writeReport(Map<?, BigDecimal> reportData, Currency currency, String reportType, Operation op) {
 
-        if (reportData == null || reportData.isEmpty() || reportType == null
+        if (reportData == null || reportData.isEmpty() || reportType == null || currency == null
                 || reportType.isEmpty() || op == null || op.toString().isEmpty())
             throw new IllegalArgumentException("Valid report data, report  type and operation are required for report output");
 
+        String reportKey = "amountSettled".equals(reportType) ? "Date" : "EntityName";
 
-        String reportKey = "amount".equals(reportType) ? "Date" : "EntityName";
-
-        PrintWriter writer = new PrintWriter(System.out, true);
-
-        NumberFormat currencyFormatter = getFormatterForCurrencyLocale(currency);
-
-        writer.printf("Amount in %s settled %s everyday:%n", currency.getCurrencyCode(), op.toString());
+        NumberFormat nf = getFormatterForCurrencyLocale();
+        DateTimeFormatter dtf = getDateFormatterWithCurrentLocale();
+        if ("Date".equals(reportKey))
+            writer.printf("%nAmount in %s settled %s everyday:%n", currency.getCurrencyCode(), op.getOperation());
+        else
+            writer.printf("%nCurrent ranking of entities based on %s operations:%n", op.getOperation());
 
         reportData.forEach((k, v) -> {
             if (k instanceof LocalDate)
-                writer.printf("%s: %2$tD, Amount: %s", reportKey, k, currencyFormatter.format(v));
+                writer.printf("%s: %s  Amount: %s%n", reportKey, ((LocalDate) k).format(dtf), nf.format(v));
             else
-                writer.printf("%s: %s, Amount: %s", reportKey, k, currencyFormatter.format(v));
+                writer.printf("%s: %s  Amount: %s%n", reportKey, k, nf.format(v));
+
         });
 
     }
 
+    public void writeReportHeader() {
 
-    private NumberFormat getFormatterForCurrencyLocale(Currency currency) {
+        writer.printf("%n-------  JP Morgan Chase  -------%n");
+        writer.printf("-------  Daily Forex Trading Report  -------%n");
 
-        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance();
-        currencyFormatter.setCurrency(currency);
-        return currencyFormatter;
+    }
 
+    public void writeReportFooter() {
+
+        writer.printf("%n-------  End Report  -------%n");
+        writer.printf("-------  JP Morgan Chase Copyright \u00a9 2018  -------%n");
+
+    }
+
+    private NumberFormat getFormatterForCurrencyLocale() {
+
+        return NumberFormat.getCurrencyInstance(this.locale);
+
+    }
+
+    private DateTimeFormatter getDateFormatterWithCurrentLocale() {
+
+        return DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(this.locale);
     }
 
 }

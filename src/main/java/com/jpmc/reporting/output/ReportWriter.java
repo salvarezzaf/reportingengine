@@ -9,5 +9,7 @@ import java.util.Map;
 public interface ReportWriter {
 
     void writeReport(Map<?, BigDecimal> reportData, Currency currency, String reportType, Operation op);
+    void writeReportHeader();
+    void writeReportFooter();
 
 }

@@ -68,7 +68,9 @@ public class TestDataUtil {
 
         if (op.equals(Operation.BUY)) {
             expectedEntityRanking.put("xyz", new BigDecimal("66881.23"));
-            if (isTie) { expectedEntityRanking.put("bmw", new BigDecimal("66881.23")); }
+            if (isTie) {
+                expectedEntityRanking.put("bmw", new BigDecimal("66881.23"));
+            }
             expectedEntityRanking.put("def", new BigDecimal("22782.38"));
             expectedEntityRanking.put("foo", new BigDecimal("10025.00"));
 
@@ -76,13 +78,45 @@ public class TestDataUtil {
         } else {
 
             expectedEntityRanking.put("mac", new BigDecimal("19822.32"));
-            if(isTie) { expectedEntityRanking.put("poc", new BigDecimal("19822.32"));}
+            if (isTie) {
+                expectedEntityRanking.put("poc", new BigDecimal("19822.32"));
+            }
             expectedEntityRanking.put("bar", new BigDecimal("14899.50"));
             expectedEntityRanking.put("abc", new BigDecimal("10408.20"));
 
             return new LinkedHashMap<>(expectedEntityRanking);
         }
 
+    }
+
+    public String getExpectedReportForSettledAmountAndOp(Operation op) {
+        if ("outgoing".equals(op.getOperation())) {
+            return "\nAmount in USD settled outgoing everyday:\n" +
+                    "Date: 1/4/16  Amount: $10,025.00\n" +
+                    "Date: 6/9/16  Amount: $22,782.38\n" +
+                    "Date: 7/7/16  Amount: $66,881.23\n";
+        } else {
+            return "\nAmount in USD settled incoming everyday:\n" +
+                    "Date: 4/9/16  Amount: $14,899.50\n" +
+                    "Date: 9/9/16  Amount: $10,408.20\n" +
+                    "Date: 10/17/16  Amount: $19,822.32\n";
+        }
+    }
+
+    public String getExpectedReportForRankingByOp(Operation op){
+        if ("outgoing".equals(op.getOperation())) {
+
+            return "\nCurrent ranking of entities based on outgoing operations:\n" +
+                    "EntityName: xyz  Amount: $66,881.23\n" +
+                    "EntityName: def  Amount: $22,782.38\n" +
+                    "EntityName: foo  Amount: $10,025.00\n";
+
+        } else {
+            return "\nCurrent ranking of entities based on incoming operations:\n" +
+                    "EntityName: mac  Amount: $19,822.32\n" +
+                    "EntityName: bar  Amount: $14,899.50\n" +
+                    "EntityName: abc  Amount: $10,408.20\n";
+        }
     }
 
 

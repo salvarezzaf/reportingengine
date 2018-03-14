@@ -11,7 +11,7 @@ public enum Operation {
     }
 
 
-    String getOperation() {
+    public String getOperation() {
         return this.operation;
     }
 
