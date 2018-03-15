@@ -12,15 +12,26 @@ import com.jpmc.reporting.output.ReportWriter;
 import java.io.PrintWriter;
 import java.util.Locale;
 
+/**
+ * Daily Trade Reporting Engine
+ * @author Fabio Salvarezza
+ * @version 1.0
+ */
 public class Application {
 
     public static void main(String[] args) {
 
-        InputDataProvider dataIn = new SimpleInputDataProvider();
-        TradeOperationsProvider top = new SimpleTradeOperationsProvider();
-        ReportWriter dataOut = new ConsoleReportWriter(new PrintWriter(System.out, true), Locale.US);
-        ReportingEngine engine = new SimpleReportingEngine();
-        engine.generateReport(dataIn, top, dataOut);
+        try {
+
+            InputDataProvider dataIn = new SimpleInputDataProvider();
+            TradeOperationsProvider top = new SimpleTradeOperationsProvider();
+            ReportWriter dataOut = new ConsoleReportWriter(new PrintWriter(System.out, true), Locale.US);
+            ReportingEngine engine = new SimpleReportingEngine();
+            engine.generateReport(dataIn, top, dataOut);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
     }
 }

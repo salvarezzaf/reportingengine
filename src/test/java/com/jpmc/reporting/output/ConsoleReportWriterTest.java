@@ -51,7 +51,7 @@ public class ConsoleReportWriterTest {
     public void writeReportFooter_WithNoArguments_ReturnsDailyReportFooter() {
 
         reportWriter.writeReportFooter();
-        String expectedOutput = "-------  End Report  -------\n" +
+        String expectedOutput = "\n-------  End Report  -------\n" +
                 "-------  JP Morgan Chase Copyright \u00a9 2018  -------\n";
         assertThat(outContent.toString(), equalTo(expectedOutput));
 

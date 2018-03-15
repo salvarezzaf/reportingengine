@@ -12,6 +12,13 @@ import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Basic implementation of {@link ReportWriter}. This implementation
+ * writes report data only to stdout. It requires a {@link PrintWriter} to
+ * write data to stdout and also uses  {@link Locale} to provide internazionalized
+ * version of final report where dates and amount get formatted according to the
+ * country report is for.
+ */
 public class ConsoleReportWriter implements ReportWriter {
 
     private PrintWriter writer;
@@ -24,6 +31,9 @@ public class ConsoleReportWriter implements ReportWriter {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void writeReport(Map<?, BigDecimal> reportData, Currency currency, String reportType, Operation op) {
 
@@ -50,6 +60,9 @@ public class ConsoleReportWriter implements ReportWriter {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void writeReportHeader() {
 
         writer.printf("%n-------  JP Morgan Chase  -------%n");
@@ -57,6 +70,9 @@ public class ConsoleReportWriter implements ReportWriter {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public void writeReportFooter() {
 
         writer.printf("%n-------  End Report  -------%n");

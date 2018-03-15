@@ -10,8 +10,16 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
+/**
+ * Simple implementation of {@link InputDataProvider} where sample instruction
+ * data set is provided manually. Future implementations of InputDataProvider could
+ * include ability to interface with databases or files which are advised in a real world
+ * production scenario
+ */
 public class SimpleInputDataProvider implements InputDataProvider {
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Instruction> retrieveInstructions() {
 

@@ -13,7 +13,9 @@ import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.*;
 
 public class SimpleTradeOperationsProvider implements TradeOperationsProvider {
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LocalDate calculateSettlementDate(LocalDate instructionDate, Currency currency) {
         if (instructionDate == null || currency == null)
@@ -31,6 +33,9 @@ public class SimpleTradeOperationsProvider implements TradeOperationsProvider {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Map<LocalDate, BigDecimal> calculateDailySettledAmount(List<Instruction> instructions, Operation op) {
 
@@ -47,6 +52,9 @@ public class SimpleTradeOperationsProvider implements TradeOperationsProvider {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public BigDecimal calculateInstructionTradeAmount(Instruction instruction) {
 
@@ -59,6 +67,9 @@ public class SimpleTradeOperationsProvider implements TradeOperationsProvider {
                 .setScale(2, BigDecimal.ROUND_HALF_EVEN);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Map<String, BigDecimal> rankEntitiesByInstructionAmount(List<Instruction> instructions, Operation op) {
 

@@ -9,6 +9,11 @@ import org.junit.rules.ExpectedException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Currency;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 public class InstructionValidationTest {
 
@@ -30,7 +35,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("",Operation.BUY,new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(),23,new BigDecimal("1.23"));
+        dataUtil.addInstructionToTestData("", Operation.BUY, new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(), 23, new BigDecimal("1.23"));
 
     }
 
@@ -39,7 +44,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData(null,Operation.BUY,new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(),23,new BigDecimal("1.23"));
+        dataUtil.addInstructionToTestData(null, Operation.BUY, new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(), 23, new BigDecimal("1.23"));
 
     }
 
@@ -48,7 +53,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",null,new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(),23,new BigDecimal("1.23"));
+        dataUtil.addInstructionToTestData("poc", null, new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(), 23, new BigDecimal("1.23"));
 
     }
 
@@ -57,7 +62,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",Operation.BUY,null, Currency.getInstance("EUR"), LocalDate.now(),23,new BigDecimal("1.23"));
+        dataUtil.addInstructionToTestData("poc", Operation.BUY, null, Currency.getInstance("EUR"), LocalDate.now(), 23, new BigDecimal("1.23"));
 
     }
 
@@ -66,7 +71,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",Operation.BUY,new BigDecimal("1.13"), null, LocalDate.now(),23,new BigDecimal("1.23"));
+        dataUtil.addInstructionToTestData("poc", Operation.BUY, new BigDecimal("1.13"), null, LocalDate.now(), 23, new BigDecimal("1.23"));
 
     }
 
@@ -75,7 +80,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",Operation.BUY,new BigDecimal("1.13"), Currency.getInstance("EUR"),null,23,new BigDecimal("1.23"));
+        dataUtil.addInstructionToTestData("poc", Operation.BUY, new BigDecimal("1.13"), Currency.getInstance("EUR"), null, 23, new BigDecimal("1.23"));
 
     }
 
@@ -84,7 +89,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",Operation.BUY,new BigDecimal("1.13"), Currency.getInstance("EUR"),LocalDate.now(),0,new BigDecimal("1.23"));
+        dataUtil.addInstructionToTestData("poc", Operation.BUY, new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(), 0, new BigDecimal("1.23"));
 
     }
 
@@ -93,7 +98,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",Operation.BUY,new BigDecimal("1.13"), Currency.getInstance("EUR"),LocalDate.now(),-1,new BigDecimal("1.23"));
+        dataUtil.addInstructionToTestData("poc", Operation.BUY, new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(), -1, new BigDecimal("1.23"));
 
     }
 
@@ -102,7 +107,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",Operation.BUY,new BigDecimal("1.13"), Currency.getInstance("EUR"),LocalDate.now(),23, null);
+        dataUtil.addInstructionToTestData("poc", Operation.BUY, new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(), 23, null);
 
     }
 
@@ -111,7 +116,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",Operation.BUY,new BigDecimal("1.13"), Currency.getInstance("EUR"),LocalDate.now(),23, new BigDecimal("-1.20"));
+        dataUtil.addInstructionToTestData("poc", Operation.BUY, new BigDecimal("1.13"), Currency.getInstance("EUR"), LocalDate.now(), 23, new BigDecimal("-1.20"));
 
     }
 
@@ -120,7 +125,7 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("poc",Operation.BUY,new BigDecimal("-1.13"), Currency.getInstance("EUR"),LocalDate.now(),23, new BigDecimal("120.4"));
+        dataUtil.addInstructionToTestData("poc", Operation.BUY, new BigDecimal("-1.13"), Currency.getInstance("EUR"), LocalDate.now(), 23, new BigDecimal("120.4"));
 
     }
 
@@ -129,11 +134,20 @@ public class InstructionValidationTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(errorMsg);
 
-        dataUtil.addInstructionToTestData("",Operation.BUY,null, Currency.getInstance("EUR"),LocalDate.now(),0, null);
+        dataUtil.addInstructionToTestData("", Operation.BUY, null, Currency.getInstance("EUR"), LocalDate.now(), 0, null);
 
     }
 
+    @Test
+    public void instruction_WithCallToStringMethod_ReturnsCorrectStringRepresentationOfObj() {
+        List<Instruction> instructions = dataUtil.getInstructionsData();
 
+        String expectedInstrctionStr = "Entity: foo, Operation: BUY, AgreedFx: 0.5, Currency: SGD, InstructionDate: 2016-01-01, " +
+                "SettlementDate: 2016-01-05, Units: 200, unitPrice: 100.25";
+        String actualInstructionStr = instructions.get(0).toString();
+
+        assertThat(actualInstructionStr, equalTo(expectedInstrctionStr));
+    }
 
 
 }
